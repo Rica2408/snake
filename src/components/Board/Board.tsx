@@ -40,12 +40,24 @@ const Board: FC<BoardType> = ({setScore, setGameOver, gameOver}) => {
 		return () => window.removeEventListener('keydown', controls)
 	}, [setGameOver])
 
+  const createFood = () => {
+    let xFood = Math.floor(Math.random() * 10 + 1)
+    let yFood = Math.floor(Math.random() * 10 + 1)
+    let result = {x: xFood, y: yFood}
+    const hasInBody = snake.some(body => body.x === xFood && body.y === yFood)
+    if (hasInBody) {
+      result = createFood()
+    }
+
+    return result
+  }
+
   const eat = async (): Promise<boolean> => {
     if (equals(food, snake[0])) {
       setSnake(value => {
         const aux = clone(value)
         aux.push(food)
-        setFood({x: Math.floor(Math.random() * 10 + 1), y: Math.floor(Math.random() * 10 + 1)})
+        setFood(createFood())
 
         return aux
       })
