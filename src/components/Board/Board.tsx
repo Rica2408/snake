@@ -1,18 +1,17 @@
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { Box } from '@material-ui/core'
 import { useStyles } from './Board.styles'
 import Snake from '../Snake'
 import { SnakeProps } from '../Snake/Snake.types'
 import { clone, equals, uniq } from 'ramda'
-import { PositionType } from './Board.types'
+import { BoardType, PositionType } from './Board.types'
 import Food from '../Food'
 
-const Board: FC = () => {
+const Board: FC<BoardType> = ({setScore, setGameOver, gameOver}) => {
   const classes = useStyles()
   const [snake, setSnake] = useState<SnakeProps[]>([{x: 3, y: 5}])
   const [position, setPosition] = useState<PositionType>('up')
   const [food, setFood] = useState<SnakeProps>({x: Math.floor(Math.random() * 10 + 1), y: Math.floor(Math.random() * 10 + 1)})
-  const [gameOver, setGameOver] = useState(true)
 
 	useEffect(() => {
 		const controls = (e: KeyboardEvent) => {
@@ -39,7 +38,7 @@ const Board: FC = () => {
 		}
 		window.addEventListener('keydown', controls)
 		return () => window.removeEventListener('keydown', controls)
-	}, [])
+	}, [setGameOver])
 
   const eat = async (): Promise<boolean> => {
     if (equals(food, snake[0])) {
@@ -62,8 +61,6 @@ const Board: FC = () => {
     }
     if (!hasEat) {
       const numberOfItems = uniq(snake)
-      console.log('numberOfItems', numberOfItems)
-      console.log('snake', snake)
       if (!equals(numberOfItems, snake)) {
         setGameOver(true)
       }
@@ -143,11 +140,12 @@ const Board: FC = () => {
     }
   })
 
+  useEffect(() => {
+    setScore(snake.length)
+  }, [setScore, snake])
+
 	return (
-		<>
-      <Box>
-        score: {snake.length}
-      </Box>
+		<div>
 			<Box className={classes.board}>
         <>
           <Food x={food.x} y={food.y} />
@@ -156,11 +154,7 @@ const Board: FC = () => {
           ))}
         </>
 			</Box>
-      <button onClick={() => setGameOver(false)}>
-        start
-      </button>
-      {gameOver ? 'gameover' : ''}
-		</>
+		</div>
   )
 }
 
